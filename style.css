@@ -171,6 +171,11 @@ p {
   color: white;
 }
 
+.book_shelf > .book_list > .book_item > .action > .blue {
+  background-color: blue;
+  color: white;
+}
+
 .book_shelf > .book_list > .book_item > .action > .red {
   background-color: darkred;
   color: white;

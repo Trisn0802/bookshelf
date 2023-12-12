@@ -39,19 +39,42 @@ function findBook(bookId) {
   return null;
 }
 
+const SAVED_EVENT = "saved-book";
+const STORAGE_KEY = "BOOK_APPS";
+
+function generateId() {
+  return +new Date();
+}
+
+// Struktur Data buku yang disimpan
+function generateBookObject(id, title, author, year, isComplete) {
+  return {
+    id, // number
+    title, // string
+    author, // string
+    year, // number
+    isComplete, // boolean
+  };
+}
+
+const books = [];
+const RENDER_EVENT = "render-book";
+
 // Menambahkan Buku baru
 function addBook() {
-  const bookTitle = document.getElementById("inputBookTitle").value.trim();
-  const bookAuthor = document.getElementById("inputBookAuthor").value;
-  const bookYear = document.getElementById("inputBookYear").value;
+  const title = document.getElementById("inputtitle").value.trim();
+  const author = document.getElementById("inputauthor").value;
+  const year = document.getElementById("inputyear").value;
+  // Mengganti format string ke integer pada inputan tahun terbit buku
+  const yearNumber = parseInt(year, 10);
   let bookIsComplete = document.getElementById("inputBookIsComplete").checked;
 
-  const generatedID = generateId();
+  const id = generateId();
   const bookObject = generateBookObject(
-    generatedID,
-    bookTitle,
-    bookAuthor,
-    bookYear,
+    id,
+    title,
+    author,
+    yearNumber,
     bookIsComplete
   );
   books.push(bookObject);
@@ -96,7 +119,7 @@ function undoBookFromCompleted(bookId) {
 
   if (bookTarget == null) return;
 
-  bookTarget.isCompleted = false;
+  bookTarget.isComplete = false;
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
@@ -107,7 +130,7 @@ function addBookToCompleted(todoId) {
 
   if (bookTarget == null) return;
 
-  bookTarget.isCompleted = true;
+  bookTarget.isComplete = true;
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
@@ -129,7 +152,7 @@ function searchBook() {
     .toLowerCase();
 
   const searchResults = books.filter((book) =>
-    book.bookTitle.toLowerCase().includes(searchTitle)
+    book.title.toLowerCase().includes(searchTitle)
   );
 
   displaySearchResults(searchResults);
@@ -156,7 +179,7 @@ function displaySearchResults(results) {
     searchResultMessage.style.display = "none";
     for (const bookItem of results) {
       const bookElement = makeBook(bookItem);
-      if (!bookItem.isCompleted) {
+      if (!bookItem.isComplete) {
         uncompletedReadingBook.append(bookElement);
       } else {
         completedReadingBook.append(bookElement);
@@ -173,48 +196,28 @@ function isStorageExist() /* boolean */ {
   return true;
 }
 
-const SAVED_EVENT = "saved-book";
-const STORAGE_KEY = "BOOK_APPS";
-
-function generateId() {
-  return +new Date();
-}
-
-function generateBookObject(id, bookTitle, bookAuthor, bookYear, isCompleted) {
-  return {
-    id,
-    bookTitle,
-    bookAuthor,
-    bookYear,
-    isCompleted,
-  };
-}
-
-const books = [];
-const RENDER_EVENT = "render-book";
-
 // Membuat tampilan data Buku
 function makeBook(bookObject) {
   const textTitle = document.createElement("h3");
-  textTitle.innerText = bookObject.bookTitle;
+  textTitle.innerText = bookObject.title;
 
   const textAuthor = document.createElement("p");
-  textAuthor.innerText = bookObject.bookAuthor;
+  textAuthor.innerText = bookObject.author;
 
   const textYear = document.createElement("p");
-  textYear.innerText = bookObject.bookYear;
+  textYear.innerText = bookObject.year;
 
   const container = document.createElement("article");
   container.classList.add("book_item");
   container.append(textTitle, textAuthor, textYear);
   container.setAttribute("id", `book-${bookObject.id}`);
 
-  if (bookObject.isCompleted) {
+  if (bookObject.isComplete) {
     const actionSection = document.createElement("div");
     actionSection.classList.add("action");
 
     const undoButton = document.createElement("button");
-    undoButton.classList.add("green");
+    undoButton.classList.add("blue");
     // Membuat teks button
     undoButton.textContent = "Belum selesai di Baca";
 
@@ -274,7 +277,7 @@ document.addEventListener(RENDER_EVENT, function () {
 
   for (const bookItem of books) {
     const bookElement = makeBook(bookItem);
-    if (!bookItem.isCompleted) uncompletedReadingBook.append(bookElement);
+    if (!bookItem.isComplete) uncompletedReadingBook.append(bookElement);
     else completedReadingBook.append(bookElement);
   }
 });
